@@ -1,0 +1,32 @@
+{
+    "name": "fievel/webspider",
+    "type": "library",
+    "description": "webspider",
+    "support": {
+        "issues": "https://github.com/Fievel90/WebSpider/issues"
+    },
+    "keywords": [
+        "spider",
+        "proxy"
+    ],
+    "homepage": "https://github.com/Fievel90/WebSpider",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Filippo Andrighetti",
+            "email": "f.andri@libero.it"
+        }
+    ],
+    "require": {
+        "doctrine/orm": "^2.5",
+        "guzzlehttp/guzzle": "^6.2",
+        "symfony/dom-crawler": "^3.1",
+        "symfony/framework-bundle": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fievel\\": "src/Fievel"
+        }
+    },
+    "minimum-stability": "stable"
+}

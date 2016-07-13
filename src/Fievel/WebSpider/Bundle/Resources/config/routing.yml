@@ -1,0 +1,3 @@
+fievel_web_spider_homepage:
+    path:     /fievel-web-spider/test
+    defaults: { _controller: FievelWebSpiderBundle:Default:index }

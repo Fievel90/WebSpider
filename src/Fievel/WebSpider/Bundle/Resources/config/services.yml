@@ -1,0 +1,12 @@
+services:
+    fievel_web_spider.spider.abstract:
+        class: Fievel\WebSpider\Components\Spider\WebSpiderAbstract
+        abstract: true
+
+    fievel_web_spider.manager.proxy:
+        class: Fievel\WebSpider\Components\Manager\ProxyManager
+        arguments: ["@doctrine.orm.entity_manager"]
+
+    fievel_web_spider.manager.spider:
+        class: Fievel\WebSpider\Components\Manager\SpiderManager
+        arguments: ["@fievel_web_spider.manager.proxy"]

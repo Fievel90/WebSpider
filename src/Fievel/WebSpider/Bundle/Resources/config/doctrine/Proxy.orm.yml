@@ -1,0 +1,48 @@
+# Fievel/WebSpider/Bundle/Resources/config/doctrine/Proxy.orm.yml
+Fievel\WebSpider\Bundle\Entity\Proxy:
+    type: entity
+    repositoryClass: Fievel\WebSpider\Bundle\Entity\Repository\ProxyRepository
+    table: proxy
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+            options:
+                unsigned: true
+    fields:
+        ip:
+            type: string
+            length: 15
+        port:
+            type: smallint
+            length: 5
+            options:
+                unsigned: true
+        type:
+            type: string
+            length: 5
+        country:
+            type: string
+            length: 100
+        lastUpdate:
+            type: datetime
+            column: last_update
+        countErrors:
+            type: smallint
+            column: count_errors
+            length: 3
+            options:
+                unsigned: true
+                default: 0
+        status:
+            type: smallint
+            length: 3
+            options:
+                unsigned: true
+                default: 1
+        origin:
+            type: string
+            length: 30
+    lifecycleCallbacks:
+        prePersist: [setLastUpdateValue]
+        preUpdate: [setLastUpdateValue]
