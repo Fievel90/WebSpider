@@ -99,7 +99,7 @@ class SpiderManager
                 $proxyTypes,
                 $proxyCountries) = $item;
 
-            $options = array_merge($options, $nextOptions);
+            $options = array_merge_recursive($options, $nextOptions);
 
             $response = $this->runSpider(
                 $spiderClass,
