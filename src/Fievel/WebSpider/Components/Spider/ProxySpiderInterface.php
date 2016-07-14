@@ -15,13 +15,6 @@ interface ProxySpiderInterface
     public function isActive();
 
     /**
-     * @param array $config
-     *
-     * @return $this
-     */
-    public function prepareClient($config = []);
-
-    /**
      * @param string $method
      * @param array $options
      *

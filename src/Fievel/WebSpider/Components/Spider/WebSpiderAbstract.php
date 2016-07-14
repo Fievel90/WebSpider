@@ -22,7 +22,7 @@ abstract class WebSpiderAbstract
     protected $url;
 
     /** @var Client */
-    protected $client;
+    static protected $client;
 
     /** @var Crawler */
     protected $crawler;
@@ -41,21 +41,14 @@ abstract class WebSpiderAbstract
      * WebSpiderAbstract constructor.
      * @param $url
      */
-    public function __construct($url)
+    public function __construct($url, $config = [])
     {
         $this->url = $url;
         $this->crawler = new Crawler();
-    }
 
-    /**
-     * @param array $config
-     *
-     * @return $this
-     */
-    public function prepareClient($config = [])
-    {
-        $this->client = new Client($config);
-        return $this;
+        if (null === static::$client) {
+            static::$client = new Client($config);
+        }
     }
 
     /**
@@ -68,10 +61,6 @@ abstract class WebSpiderAbstract
      */
     public function execute($method, $options = [])
     {
-        if (null === $this->client) {
-            throw new \InvalidArgumentException('Create client before spider execution.');
-        }
-
         $method = strtolower($method);
         if (!in_array($method, $this->availableMethods, false)) {
             throw new \InvalidArgumentException("Method $method not supported.");
@@ -83,7 +72,7 @@ abstract class WebSpiderAbstract
             $this->logInfo("Launching spider: {$this->url}");
 
             /** @var ResponseInterface $response */
-            $response = $this->client->$method($this->url, $options);
+            $response = static::$client->$method($this->url, $options);
 
             if ($this->isSuccessfull($response)) {
                 $this->logInfo('Parsing response');

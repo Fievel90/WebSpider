@@ -2,6 +2,7 @@
 
 namespace Fievel\WebSpider\Components\Manager;
 
+use Fievel\WebSpider\Components\Entity\SpiderCallQueue;
 use Fievel\WebSpider\Components\Logger\LoggerTrait;
 use Fievel\WebSpider\Components\Middleware\ProxyMiddleware;
 use Fievel\WebSpider\Components\Spider\WebSpiderAbstract;
@@ -32,7 +33,8 @@ class SpiderManager
     }
 
     /**
-     * @param WebSpiderAbstract $spider
+     * @param $spiderClass
+     * @param $url
      * @param $method
      * @param array $config
      * @param array $options
@@ -45,7 +47,8 @@ class SpiderManager
      * @throws \InvalidArgumentException
      */
     public function runSpider(
-        WebSpiderAbstract $spider,
+        $spiderClass,
+        $url,
         $method,
         $config = [],
         $options = [],
@@ -53,17 +56,79 @@ class SpiderManager
         $proxyTypes = [],
         $proxyCountries = []
     ) {
+        $spider = new $spiderClass($url, $config);
+        if (!($spider instanceof WebSpiderAbstract)) {
+            throw new \InvalidArgumentException("{$spiderClass} must extend WebSpiderAbstract class");
+        }
+
+        $this->proxyManager->setLogger($this->logger);
+        $spider->setLogger($this->logger);
+
         $config['handler'] = $this->retryHandler($useProxy, $proxyTypes, $proxyCountries);
 
-        $response = $spider
-            ->prepareClient($config)
-            ->execute($method, $options);
+        $response = $spider->execute($method, $options);
 
         if (null !== $response) {
             return $response;
         }
 
         return null;
+    }
+
+    /**
+     * @param SpiderCallQueue $queue
+     *
+     * @return mixed|null
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function runSpiderQueue(SpiderCallQueue $queue)
+    {
+        $iterator = $queue->getIterator();
+
+        $response = null;
+        $nextOptions = [];
+
+        foreach ($iterator as $item) {
+            list($spiderClass,
+                $url,
+                $method,
+                $config,
+                $options,
+                $useProxy,
+                $proxyTypes,
+                $proxyCountries) = $item;
+
+            $options = array_merge($options, $nextOptions);
+
+            $response = $this->runSpider(
+                $spiderClass,
+                $url,
+                $method,
+                $config,
+                $options,
+                $useProxy,
+                $proxyTypes,
+                $proxyCountries
+            );
+
+            if ($response === null) {
+                return null;
+            }
+
+            if (isset($response['breakQueue']) && $response['breakQueue'] === true) {
+                return $response;
+            }
+
+            if (isset($response['chainOptions'], $response['options'])
+                && $response['chainOptions'] === true
+                && is_array($response['options'])
+            ) {
+                $nextOptions = $response['options'];
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -105,7 +170,7 @@ class SpiderManager
 
                     $this->logInfo("HTTP Status Code: {$statusCode} - {$reasongPhrase}");
 
-                    if ($statusCode < 200 || $statusCode >= 300) {
+                    if ($statusCode < 200 || $statusCode >= 500) {
                         $this->logInfo("Retry #{$retries}");
                         return true;
                     }

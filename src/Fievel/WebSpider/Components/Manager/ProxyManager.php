@@ -4,6 +4,7 @@ namespace Fievel\WebSpider\Components\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Fievel\WebSpider\Components\Entity\ProxyInterface;
+use Fievel\WebSpider\Components\Entity\Repository\ProxyRepositoryInterface;
 use Fievel\WebSpider\Components\Logger\LoggerTrait;
 use Fievel\WebSpider\Components\Spider\ProxySpiderInterface;
 use Fievel\WebSpider\Components\Spider\ProxyTester\ProxyTesterSpider;
@@ -33,6 +34,7 @@ class ProxyManager
     {
         $this->logInfo('Retrieving Proxy list');
 
+        /** @var ProxyRepositoryInterface $repo */
         $repo = $this->em->getRepository('FievelWebSpiderBundle:Proxy');
         return $repo->getAllRandom();
     }
@@ -46,6 +48,7 @@ class ProxyManager
     public function getRandomProxy($types = [], $countries = []) {
         $this->logInfo('Retrieving random Proxy');
 
+        /** @var ProxyRepositoryInterface $repo */
         $repo = $this->em->getRepository('FievelWebSpiderBundle:Proxy');
 
         /** @var ProxyInterface $proxy */
@@ -67,6 +70,7 @@ class ProxyManager
     {
         $this->logInfo('Updating Proxy list');
 
+        /** @var ProxyRepositoryInterface $repo */
         $repo = $this->em->getRepository('FievelWebSpiderBundle:Proxy');
 
         $proxyList = [];
@@ -78,9 +82,7 @@ class ProxyManager
                 if ($proxySpider instanceof ProxySpiderInterface
                     && $proxySpider->isActive()
                 ) {
-                    $proxyList[$proxySpider->getSourceSite()] = $proxySpider
-                        ->prepareClient()
-                        ->execute();
+                    $proxyList[$proxySpider->getSourceSite()] = $proxySpider->execute();
                 }
             }
         }
@@ -117,6 +119,7 @@ class ProxyManager
      */
     public function testProxy(ProxyInterface $proxy, $host = null)
     {
+        /** @var ProxyRepositoryInterface $repo */
         $repo = $this->em->getRepository('FievelWebSpiderBundle:Proxy');
 
         $spider = new ProxyTesterSpider($host);
@@ -125,9 +128,7 @@ class ProxyManager
         $numErrors = $proxy->getCountErrors();
 
         for ($i = 0; $i < 5; $i++) {
-            $response = $spider
-                ->prepareClient()
-                ->execute('get');
+            $response = $spider->execute('get');
             if (null === $response) {
                 $numErrors++;
             }
