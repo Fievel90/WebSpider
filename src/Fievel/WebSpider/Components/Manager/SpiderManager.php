@@ -3,6 +3,7 @@
 namespace Fievel\WebSpider\Components\Manager;
 
 use Fievel\WebSpider\Components\Entity\SpiderCallQueue;
+use Fievel\WebSpider\Components\Entity\SpiderStorage;
 use Fievel\WebSpider\Components\Logger\LoggerTrait;
 use Fievel\WebSpider\Components\Middleware\ProxyMiddleware;
 use Fievel\WebSpider\Components\Spider\WebSpiderAbstract;
@@ -38,6 +39,7 @@ class SpiderManager
      * @param $method
      * @param array $config
      * @param array $options
+     * @param SpiderStorage|null $storage
      * @param bool $useProxy
      * @param array $proxyTypes
      * @param array $proxyCountries
@@ -52,11 +54,12 @@ class SpiderManager
         $method,
         $config = [],
         $options = [],
+        SpiderStorage $storage = null,
         $useProxy = false,
         $proxyTypes = [],
         $proxyCountries = []
     ) {
-        $spider = new $spiderClass($url, $config);
+        $spider = new $spiderClass($url, $config, $storage);
         if (!($spider instanceof WebSpiderAbstract)) {
             throw new \InvalidArgumentException("{$spiderClass} must extend WebSpiderAbstract class");
         }
@@ -77,12 +80,13 @@ class SpiderManager
 
     /**
      * @param SpiderCallQueue $queue
+     * @param SpiderStorage|null $storage
      *
      * @return mixed|null
      *
      * @throws \InvalidArgumentException
      */
-    public function runSpiderQueue(SpiderCallQueue $queue)
+    public function runSpiderQueue(SpiderCallQueue $queue, SpiderStorage $storage = null)
     {
         $iterator = $queue->getIterator();
 
@@ -107,6 +111,7 @@ class SpiderManager
                 $method,
                 $config,
                 $options,
+                $storage,
                 $useProxy,
                 $proxyTypes,
                 $proxyCountries

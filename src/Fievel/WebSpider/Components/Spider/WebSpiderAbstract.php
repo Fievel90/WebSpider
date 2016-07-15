@@ -2,6 +2,7 @@
 
 namespace Fievel\WebSpider\Components\Spider;
 
+use Fievel\WebSpider\Components\Entity\SpiderStorage;
 use Fievel\WebSpider\Components\Logger\LoggerTrait;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
@@ -27,6 +28,9 @@ abstract class WebSpiderAbstract
     /** @var Crawler */
     protected $crawler;
 
+    /** @var SpiderStorage */
+    protected $storage;
+
     /** @var array */
     protected $availableMethods = [
         self::HTTP_METHOD_GET,
@@ -40,11 +44,14 @@ abstract class WebSpiderAbstract
     /**
      * WebSpiderAbstract constructor.
      * @param $url
+     * @param array $config
+     * @param SpiderStorage|null $storage
      */
-    public function __construct($url, $config = [])
+    public function __construct($url, $config = [], SpiderStorage $storage = null)
     {
         $this->url = $url;
         $this->crawler = new Crawler();
+        $this->storage = $storage;
 
         if (null === static::$client) {
             static::$client = new Client($config);
