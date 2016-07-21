@@ -13,7 +13,7 @@ This repository wraps Guzzle and some Symfony components providing an easy way f
 
 Add `fievel/webspider` as a require dependency in your `composer.json` file:
 
-    composer require fabpot/goutte
+    composer require fievel/webspider
 
 ## Usage
 
